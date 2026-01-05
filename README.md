@@ -11,29 +11,15 @@ Gemini API를 이용한 음성 녹음 및 텍스트 변환 프로그램입니다
 
 ## 설치 방법
 
-### 1. 시스템 의존성 설치
-
-#### Ubuntu/Debian
-```bash
-sudo apt-get update
-sudo apt-get install python3-pyaudio portaudio19-dev
-```
-
-#### macOS
-```bash
-brew install portaudio
-```
-
-#### Windows
-PyAudio는 pip로 설치됩니다.
-
-### 2. Python 패키지 설치
+### 1. Python 패키지 설치
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. API 키 설정
+모든 플랫폼(Windows, macOS, Linux)에서 추가 시스템 의존성 없이 설치됩니다.
+
+### 2. API 키 설정
 
 1. [Google AI Studio](https://makersuite.google.com/app/apikey)에서 Gemini API 키를 발급받습니다.
 
@@ -43,7 +29,7 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-3. `.env` 파일을 편집하여 API 키를 입력합니다:
+3. `.env` 파일을 편집하여 실제 API 키를 입력합니다:
 
 ```
 GEMINI_API_KEY=your_actual_api_key_here

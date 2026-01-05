@@ -4,8 +4,9 @@ Gemini API를 이용한 음성 녹음 및 텍스트 변환 (STT)
 """
 
 import os
-import wave
-import pyaudio
+import sounddevice as sd
+import numpy as np
+from scipy.io import wavfile
 import google.generativeai as genai
 from dotenv import load_dotenv
 from pathlib import Path
@@ -31,11 +32,8 @@ class GeminiSTT:
         self.model = genai.GenerativeModel('gemini-1.5-flash')
 
         # 오디오 설정
-        self.chunk = 1024
-        self.format = pyaudio.paInt16
         self.channels = 1
         self.rate = 16000
-        self.audio = pyaudio.PyAudio()
 
     def record_audio(self, duration=5, output_file="recorded_audio.wav"):
         """
@@ -49,37 +47,23 @@ class GeminiSTT:
             녹음된 파일 경로
         """
         print(f"\n🎤 녹음을 시작합니다... ({duration}초)")
+        print("녹음 중...", end='', flush=True)
 
-        stream = self.audio.open(
-            format=self.format,
+        # 녹음
+        recording = sd.rec(
+            int(duration * self.rate),
+            samplerate=self.rate,
             channels=self.channels,
-            rate=self.rate,
-            input=True,
-            frames_per_buffer=self.chunk
+            dtype='int16'
         )
 
-        frames = []
-
-        for i in range(0, int(self.rate / self.chunk * duration)):
-            data = stream.read(self.chunk)
-            frames.append(data)
-
-            # 진행 상황 표시
-            elapsed = (i + 1) * self.chunk / self.rate
-            print(f"\r녹음 중... {elapsed:.1f}/{duration}초", end='')
+        # 녹음 완료 대기
+        sd.wait()
 
         print("\n✅ 녹음 완료!")
 
-        stream.stop_stream()
-        stream.close()
-
         # WAV 파일로 저장
-        wf = wave.open(output_file, 'wb')
-        wf.setnchannels(self.channels)
-        wf.setsampwidth(self.audio.get_sample_size(self.format))
-        wf.setframerate(self.rate)
-        wf.writeframes(b''.join(frames))
-        wf.close()
+        wavfile.write(output_file, self.rate, recording)
 
         return output_file
 
@@ -136,10 +120,6 @@ class GeminiSTT:
             print(f"💾 오디오 파일 저장됨: {audio_file}")
 
         return text
-
-    def __del__(self):
-        """소멸자: PyAudio 종료"""
-        self.audio.terminate()
 
 
 def main():
